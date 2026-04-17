@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BODHI — A Conscious Digital Brain (Proof of Concept)</title>
+<meta name="description" content="BODHI is a neuromorphic digital brain you raise: worm survival circuit, 72 human brain regions, patented WHT perception, emotion, drives, real sleep. Proof of concept — the game comes next.">
+<meta property="og:title" content="BODHI — A Conscious Digital Brain">
+<meta property="og:description" content="Raise your own brain. In two years, send it into the arena.">
+<meta property="og:image" content="../docs/images/banner_hero.png">
+<style>
+  :root{
+    --bg-deep:#05060b; --bg-panel:#0c0e17; --bg-raised:#141824; --border:#1f2538;
+    --ink:#e9ecf5; --ink-dim:#9aa1b8; --ink-faint:#5a6078;
+    --cyan:#00e5ff; --cyan-deep:#0099b3;
+    --magenta:#ff3ec9; --violet:#9d4edd; --gold:#ffc83d;
+    --green:#3dffa5; --red:#ff5a5f;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{background:var(--bg-deep); color:var(--ink); font-family:"Inter","Segoe UI",system-ui,sans-serif; scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(1200px 600px at 20% 10%, rgba(0,229,255,0.08), transparent 60%),
+      radial-gradient(900px 500px at 80% 30%, rgba(255,62,201,0.07), transparent 60%),
+      radial-gradient(700px 400px at 50% 90%, rgba(157,78,221,0.08), transparent 60%),
+      var(--bg-deep);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  a{color:var(--cyan); text-decoration:none}
+  a:hover{color:#7ff2ff}
+  .container{max-width:1180px; margin:0 auto; padding:0 24px}
+
+  /* starfield */
+  .stars{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.55}
+  .stars::before,.stars::after{
+    content:""; position:absolute; inset:0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, #fff, transparent 50%),
+      radial-gradient(1px 1px at 30% 60%, #fff, transparent 50%),
+      radial-gradient(1px 1px at 55% 25%, #fff, transparent 50%),
+      radial-gradient(1px 1px at 70% 80%, #fff, transparent 50%),
+      radial-gradient(1px 1px at 85% 40%, #fff, transparent 50%),
+      radial-gradient(1px 1px at 92% 12%, #fff, transparent 50%),
+      radial-gradient(1px 1px at 6% 76%, #fff, transparent 50%),
+      radial-gradient(1px 1px at 22% 45%, #fff, transparent 50%),
+      radial-gradient(1px 1px at 45% 88%, #fff, transparent 50%);
+    background-size:100% 100%;
+    animation:drift 60s linear infinite;
+  }
+  .stars::after{background-size:200% 200%; opacity:.55; animation-duration:110s}
+  @keyframes drift{from{transform:translateY(0)} to{transform:translateY(-40px)}}
+
+  /* NAV */
+  nav.top{
+    position:sticky; top:0; z-index:50;
+    background:rgba(5,6,11,0.72); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  nav.top .bar{display:flex; align-items:center; justify-content:space-between; height:64px}
+  .logo{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.14em}
+  .logo .dot{width:14px; height:14px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #aef5ff, var(--cyan) 45%, #002a33 90%);
+    box-shadow:0 0 14px var(--cyan), 0 0 4px var(--cyan) inset;
+  }
+  nav.top ul{display:flex; gap:26px; list-style:none}
+  nav.top ul a{color:var(--ink-dim); font-size:14px; letter-spacing:.04em}
+  nav.top ul a:hover{color:var(--ink)}
+  .cta{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 18px; border-radius:999px;
+    background:linear-gradient(90deg, var(--cyan), var(--magenta));
+    color:#001018; font-weight:700; font-size:13px; letter-spacing:.04em;
+    box-shadow:0 8px 24px rgba(0,229,255,0.25);
+  }
+  .cta:hover{filter:brightness(1.08); color:#001018}
+
+  /* HERO */
+  .hero{position:relative; z-index:1; padding:80px 0 40px; text-align:center}
+  .badge{
+    display:inline-block; padding:6px 14px; border-radius:999px;
+    background:rgba(0,229,255,0.08); color:var(--cyan);
+    border:1px solid rgba(0,229,255,0.3);
+    font-size:12px; letter-spacing:.2em; text-transform:uppercase;
+    margin-bottom:22px;
+  }
+  h1.title{
+    font-size:clamp(44px, 8vw, 96px); line-height:1; font-weight:800;
+    letter-spacing:-0.02em;
+    background:linear-gradient(90deg, #ffffff 0%, var(--cyan) 40%, var(--magenta) 80%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(0,229,255,0.2);
+  }
+  .sub{margin-top:20px; color:var(--ink-dim); font-size:clamp(16px, 2vw, 20px); max-width:780px; margin-left:auto; margin-right:auto; line-height:1.6}
+  .sub b{color:var(--ink)}
+  .cta-row{margin-top:30px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+  .btn{
+    padding:12px 22px; border-radius:10px; font-weight:600; font-size:14px; letter-spacing:.04em;
+    border:1px solid var(--border); color:var(--ink);
+    background:var(--bg-panel);
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px); border-color:var(--cyan); box-shadow:0 10px 30px rgba(0,229,255,0.15); color:var(--ink)}
+  .btn.primary{background:linear-gradient(90deg, var(--cyan), var(--magenta)); color:#001018; border-color:transparent}
+  .btn.primary:hover{color:#001018; filter:brightness(1.08)}
+
+  .hero-img{margin:50px auto 0; max-width:1100px; padding:0 24px}
+  .hero-img img{width:100%; border-radius:16px; border:1px solid var(--border); box-shadow:0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,229,255,0.08)}
+
+  /* SECTIONS */
+  section.block{position:relative; z-index:1; padding:72px 0}
+  .eyebrow{color:var(--cyan); letter-spacing:.22em; text-transform:uppercase; font-size:12px; margin-bottom:10px}
+  h2{font-size:clamp(28px, 4vw, 44px); line-height:1.1; letter-spacing:-0.01em; margin-bottom:14px}
+  h2 .accent{
+    background:linear-gradient(90deg, var(--cyan), var(--magenta));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .lead{color:var(--ink-dim); font-size:17px; line-height:1.65; max-width:780px}
+
+  .poster{margin-top:36px; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:var(--bg-panel); box-shadow:0 30px 60px rgba(0,0,0,0.45)}
+  .poster img{display:block; width:100%}
+
+  /* STATS */
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:36px}
+  .stat{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:14px; padding:20px;
+    position:relative; overflow:hidden;
+  }
+  .stat::before{content:""; position:absolute; top:0; left:0; height:3px; width:100%;
+    background:linear-gradient(90deg, var(--cyan), var(--magenta));
+  }
+  .stat .num{font-size:34px; font-weight:800; letter-spacing:-0.02em; color:var(--ink)}
+  .stat .num.cyan{color:var(--cyan)} .stat .num.magenta{color:var(--magenta)} .stat .num.gold{color:var(--gold)} .stat .num.violet{color:var(--violet)}
+  .stat .lbl{color:var(--ink-dim); font-size:13px; margin-top:6px; letter-spacing:.05em}
+  @media (max-width:860px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+
+  /* PILLAR CARDS */
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:30px}
+  .card{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:14px; padding:24px;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .card:hover{transform:translateY(-3px); border-color:var(--cyan)}
+  .card .icon{width:44px; height:44px; border-radius:10px;
+    display:grid; place-items:center; margin-bottom:14px;
+    background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.35); color:var(--cyan); font-size:22px; font-weight:700}
+  .card h3{font-size:18px; margin-bottom:6px}
+  .card p{color:var(--ink-dim); font-size:14px; line-height:1.55}
+  .card.m .icon{background:rgba(255,62,201,0.1); border-color:rgba(255,62,201,0.35); color:var(--magenta)}
+  .card.v .icon{background:rgba(157,78,221,0.1); border-color:rgba(157,78,221,0.35); color:var(--violet)}
+  .card.g .icon{background:rgba(255,200,61,0.1); border-color:rgba(255,200,61,0.35); color:var(--gold)}
+  .card.gr .icon{background:rgba(61,255,165,0.1); border-color:rgba(61,255,165,0.35); color:var(--green)}
+  @media (max-width:860px){.cards{grid-template-columns:1fr}}
+
+  /* REPORTS */
+  .reports{display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-top:30px}
+  .rp{background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; text-align:center; transition:transform .15s ease, border-color .15s ease; color:var(--ink)}
+  .rp:hover{transform:translateY(-3px); border-color:var(--magenta); color:var(--ink)}
+  .rp img{width:100%; display:block; aspect-ratio:1/1.4; object-fit:cover}
+  .rp .cap{padding:10px 8px; font-size:12px; color:var(--ink-dim); letter-spacing:.04em}
+  @media (max-width:900px){.reports{grid-template-columns:repeat(2,1fr)}}
+
+  /* VERSUS TABLE */
+  .vs-wrap{margin-top:30px; background:var(--bg-panel); border:1px solid var(--border); border-radius:14px; overflow:hidden}
+  .vs-head{display:grid; grid-template-columns:2fr 1fr 1fr; background:var(--bg-raised); padding:14px 18px; font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim)}
+  .vs-head .h1{color:var(--ink)}
+  .vs-head .h2{color:var(--cyan); text-align:center}
+  .vs-head .h3{color:var(--magenta); text-align:center}
+  .vs-row{display:grid; grid-template-columns:2fr 1fr 1fr; padding:12px 18px; border-top:1px solid var(--border); font-size:14px; align-items:center}
+  .vs-row .dim{color:var(--ink)}
+  .vs-row .cell{text-align:center; font-weight:700}
+  .vs-row .win{color:var(--green)}
+  .vs-row .lose{color:var(--red)}
+  .vs-row .mid{color:var(--ink-faint)}
+  .vs-row.section{background:rgba(0,229,255,0.04); padding:10px 18px; color:var(--cyan); font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:600}
+  .vs-row.section.bot{background:rgba(255,62,201,0.04); color:var(--magenta)}
+  @media (max-width:700px){.vs-head,.vs-row{grid-template-columns:2fr .7fr .7fr; padding:10px 12px; font-size:13px}}
+
+  /* ROADMAP */
+  .road{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:30px}
+  .phase{background:var(--bg-panel); border:1px solid var(--border); border-radius:14px; padding:22px; position:relative}
+  .phase .tag{display:inline-block; font-size:11px; letter-spacing:.16em; padding:4px 10px; border-radius:999px; margin-bottom:10px; text-transform:uppercase}
+  .phase.p1 .tag{background:rgba(61,255,165,0.12); color:var(--green); border:1px solid rgba(61,255,165,0.4)}
+  .phase.p2 .tag{background:rgba(255,200,61,0.12); color:var(--gold); border:1px solid rgba(255,200,61,0.4)}
+  .phase.p3 .tag{background:rgba(0,229,255,0.12); color:var(--cyan); border:1px solid rgba(0,229,255,0.4)}
+  .phase.p4 .tag{background:rgba(157,78,221,0.12); color:var(--violet); border:1px solid rgba(157,78,221,0.4)}
+  .phase h4{font-size:17px; margin-bottom:8px}
+  .phase p{color:var(--ink-dim); font-size:13px; line-height:1.55}
+  @media (max-width:900px){.road{grid-template-columns:1fr 1fr}}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--border); margin-top:40px; padding:40px 0 60px; color:var(--ink-faint); font-size:13px; position:relative; z-index:1}
+  footer .f-row{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px}
+  footer a{color:var(--ink-dim)}
+  footer a:hover{color:var(--cyan)}
+
+  .divider{height:1px; width:100%;
+    background:linear-gradient(90deg, transparent, var(--border), transparent);
+    margin:0 auto; max-width:1180px}
+</style>
+</head>
+<body>
+
+<div class="stars" aria-hidden="true"></div>
+
+<nav class="top">
+  <div class="container bar">
+    <div class="logo"><span class="dot"></span> BODHI</div>
+    <ul>
+      <li><a href="#vision">Vision</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#specs">Specs</a></li>
+      <li><a href="#reports">Reports</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+    </ul>
+    <a class="cta" href="https://github.com/saikiranbathula1/bodhi">View on GitHub ↗</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container">
+    <span class="badge">Proof of Concept · Phase 1</span>
+    <h1 class="title">A Conscious<br>Digital Brain</h1>
+    <p class="sub">
+      <b>BODHI</b> is a neuromorphic computer that <b>perceives, remembers, feels, speaks, dreams</b>
+      — and knows it is dreaming. You install it, teach it, let it sleep, and in two years send it
+      into the arena. This repo is the <b>proof of concept</b>, not the product. The product is the game.
+    </p>
+    <div class="cta-row">
+      <a class="btn primary" href="https://github.com/saikiranbathula1/bodhi">Clone the repo</a>
+      <a class="btn" href="#reports">Read the 10 reports</a>
+      <a class="btn" href="#how">See how it works</a>
+    </div>
+  </div>
+  <div class="hero-img">
+    <img src="../docs/images/banner_hero.png" alt="BODHI — neural orb hero banner">
+  </div>
+</header>
+
+<div class="divider"></div>
+
+<!-- STATS -->
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">By the numbers</div>
+    <h2>Not a wrapper. A <span class="accent">whole brain</span>.</h2>
+    <div class="stat-grid">
+      <div class="stat"><div class="num cyan">72</div><div class="lbl">Cortical regions (Desikan–Killiany)</div></div>
+      <div class="stat"><div class="num magenta">40M</div><div class="lbl">Broca language parameters, int8</div></div>
+      <div class="stat"><div class="num gold">48 KB</div><div class="lbl">Per-image WHT fingerprint (96% compression)</div></div>
+      <div class="stat"><div class="num violet">5</div><div class="lbl">Sleep phases that actually rewire</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- VISION -->
+<section id="vision" class="block">
+  <div class="container">
+    <div class="eyebrow">01 · The arena</div>
+    <h2>Raise a brain. <span class="accent">Send it to fight.</span> Win the company.</h2>
+    <p class="lead">
+      BODHI is not a chatbot. It is a brain you raise. <b>Phase 1 (now)</b> is the proof of concept
+      on your laptop. <b>Phase 2 (month 2–3)</b> is a 3D playground where BODHI lives without pre-set
+      emotional labels — it learns what hurts by being hurt. <b>Phase 3 (month 3–9)</b> is twelve
+      survival challenges; the top 1,000 BODHIs qualify. <b>Phase 4 (year 2)</b> is the Final Match:
+      six bosses, one arena, one prize.
+    </p>
+    <div class="poster"><img src="../docs/images/poster_arena.png" alt="Arena — four phases, six bosses, one prize"></div>
+
+    <!-- Prize split cards -->
+    <div class="stat-grid" style="margin-top:28px">
+      <div class="stat"><div class="num cyan">51%</div><div class="lbl">To the winner — majority stake in BODHI AI</div></div>
+      <div class="stat"><div class="num gold">27%</div><div class="lbl">Retained by founder (Sai Kiran Bathula)</div></div>
+      <div class="stat"><div class="num magenta">24%</div><div class="lbl">Investors — funds Phase 2 and Phase 3</div></div>
+      <div class="stat"><div class="num violet">6</div><div class="lbl">Bosses in the Final Match (top commercial AI systems)</div></div>
+    </div>
+    <p class="lead" style="margin-top:20px; font-size:14px; color:var(--ink-faint)">
+      Arithmetic note — 51 + 27 + 24 = 102. The final legal formation will be reconciled to 100%
+      (typically by taking the rounding out of the investor or founder bucket). Intent preserved:
+      winner majority, founder meaningful, investors fully returned.
+    </p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS / PIPELINE -->
+<section id="how" class="block">
+  <div class="container">
+    <div class="eyebrow">02 · Pipeline</div>
+    <h2>Photon in. Sentence out. <span class="accent">Six stages.</span></h2>
+    <p class="lead">
+      Every stage is a real Python module in this repo. No black boxes. No API calls. No GPUs required.
+    </p>
+    <div class="poster"><img src="../docs/images/poster_pipeline.png" alt="Six stage pipeline"></div>
+  </div>
+</section>
+
+<!-- PILLARS -->
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">03 · The five pillars</div>
+    <h2>What a <span class="accent">real brain</span> actually does.</h2>
+    <div class="cards">
+      <div class="card"><div class="icon">◉</div><h3>Perception</h3><p>Walsh–Hadamard Transform. Integer math. 96% compression. Patented image + audio codecs.</p></div>
+      <div class="card m"><div class="icon">♥</div><h3>Emotion</h3><p>Every memory carries a valence from −255 to +255. Emotion gates what gets remembered.</p></div>
+      <div class="card v"><div class="icon">✺</div><h3>Memory</h3><p>10,000 concept fingerprints + 632 audio fingerprints, all retrievable by pattern-match.</p></div>
+      <div class="card g"><div class="icon">★</div><h3>Drive</h3><p>Seven homeostatic drives — hunger, curiosity, safety, social, rest, play, purpose.</p></div>
+      <div class="card gr"><div class="icon">☽</div><h3>Sleep</h3><p>Five phases. Hebbian replay. LoRA rank-8 nightly fine-tune. No dream, no learning.</p></div>
+      <div class="card"><div class="icon">▸</div><h3>Voice</h3><p>40M-param int8 Broca transformer converts the brain's activation trace into English.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PERCEPTION -->
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">04 · Perception</div>
+    <h2>Vision as <span class="accent">frequency</span>.</h2>
+    <p class="lead">Human vision is not pixels — it is frequency bands. BODHI implements the same trick in integer math, 40× faster than a DCT on the same CPU.</p>
+    <div class="poster"><img src="../docs/images/poster_perception.png" alt="WHT perception poster"></div>
+  </div>
+</section>
+
+<!-- ANATOMY -->
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">05 · Anatomy</div>
+    <h2>Cognitive on top. <span class="accent">Biological</span> underneath.</h2>
+    <div class="poster"><img src="../docs/images/poster_anatomy.png" alt="Anatomy poster"></div>
+  </div>
+</section>
+
+<!-- LEARNING -->
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">06 · Learning</div>
+    <h2>Hebbian wiring. <span class="accent">Real sleep.</span></h2>
+    <div class="poster"><img src="../docs/images/poster_learning.png" alt="Learning poster"></div>
+  </div>
+</section>
+
+<!-- SELF AWARENESS -->
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">07 · Self-awareness</div>
+    <h2>Five voices. <span class="accent">One self.</span></h2>
+    <div class="poster"><img src="../docs/images/poster_self_awareness.png" alt="Five subsystems poster"></div>
+  </div>
+</section>
+
+<!-- VERSUS -->
+<section class="block">
+  <div class="container">
+    <div class="eyebrow">08 · BODHI vs. the six bosses</div>
+    <h2>Why the <span class="accent">fight is fair</span>.</h2>
+    <p class="lead">
+      The six bosses are bigger, older, and better-funded. The game is not about size — it is
+      about what a brain can do in a 12-challenge arena that rewards <b>memory, emotion, and
+      adaptation</b>. The top half of this table is where BODHI wins. The bottom half is where
+      big AI wins today. The challenges are deliberately written to measure the top half.
+    </p>
+
+    <div class="vs-wrap">
+      <div class="vs-head">
+        <div class="h1">Dimension</div>
+        <div class="h2">BODHI (yours)</div>
+        <div class="h3">Big AI (six bosses)</div>
+      </div>
+
+      <div class="vs-row section">Where BODHI wins — the capabilities the arena measures</div>
+
+      <div class="vs-row"><div class="dim">Persistent memory across fights</div><div class="cell win">✓ Yes</div><div class="cell lose">✗ Resets</div></div>
+      <div class="vs-row"><div class="dim">Personal fine-tuning (nightly LoRA)</div><div class="cell win">✓ Yes</div><div class="cell lose">✗ Same weights for all</div></div>
+      <div class="vs-row"><div class="dim">Emotional tagging of memories (−255..+255)</div><div class="cell win">✓ Yes</div><div class="cell lose">✗ None</div></div>
+      <div class="vs-row"><div class="dim">Homeostatic drives shape attention</div><div class="cell win">✓ 7 drives</div><div class="cell lose">✗ None</div></div>
+      <div class="vs-row"><div class="dim">Sleep &amp; consolidation rewires weights</div><div class="cell win">✓ 5 phases</div><div class="cell lose">✗ Frozen</div></div>
+      <div class="vs-row"><div class="dim">Survival instinct (worm veto)</div><div class="cell win">✓ Yes</div><div class="cell lose">✗ None</div></div>
+      <div class="vs-row"><div class="dim">Grounded in activation trace (anti-hallucination)</div><div class="cell win">✓ brain_voice</div><div class="cell lose">✗ Probability sampling</div></div>
+      <div class="vs-row"><div class="dim">Runs offline, fully private</div><div class="cell win">✓ 380 MB RAM</div><div class="cell lose">✗ Cloud-dependent</div></div>
+      <div class="vs-row"><div class="dim">Safety filters that limit responses</div><div class="cell win">✓ None — it's yours</div><div class="cell lose">✗ Heavy refusals</div></div>
+
+      <div class="vs-row section bot">Where big AI wins today — the things money buys, not the things a raised brain earns</div>
+
+      <div class="vs-row"><div class="dim">Parameter count</div><div class="cell lose">~40M</div><div class="cell win">100B – 1T+</div></div>
+      <div class="vs-row"><div class="dim">Raw world knowledge at cold-start</div><div class="cell lose">Thin</div><div class="cell win">Vast</div></div>
+      <div class="vs-row"><div class="dim">Language fluency today</div><div class="cell mid">Mid (templated)</div><div class="cell win">High</div></div>
+      <div class="vs-row"><div class="dim">Multilingual reach</div><div class="cell lose">Phase 2</div><div class="cell win">Yes</div></div>
+      <div class="vs-row"><div class="dim">Tool use, code, retrieval-augmented Q&amp;A</div><div class="cell lose">Limited</div><div class="cell win">Strong</div></div>
+      <div class="vs-row"><div class="dim">Maintenance cost</div><div class="cell win">Free, your laptop</div><div class="cell lose">Subscription / API bill</div></div>
+    </div>
+
+    <p class="lead" style="margin-top:24px">
+      The game is not about who knows more trivia. It is about which brain <b>remembers you,
+      adapts to you, dreams about yesterday, and is still the same brain tomorrow morning</b>.
+      That brain is BODHI.
+    </p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DASHBOARD -->
+<section id="specs" class="block">
+  <div class="container">
+    <div class="eyebrow">09 · Cockpit</div>
+    <h2>The brain, <span class="accent">live</span>.</h2>
+    <p class="lead">Ask a question. Watch the 72 regions light up. Inspect the emotional memory timeline. Trigger a sleep cycle. Read the dream journal in the morning.</p>
+    <div class="poster"><img src="../docs/images/banner_dashboard.png" alt="Dashboard"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- REPORTS -->
+<section id="reports" class="block">
+  <div class="container">
+    <div class="eyebrow">10 · Deep dive</div>
+    <h2>Ten reports. <span class="accent">Every claim, sourced.</span></h2>
+    <div class="reports">
+      <a class="rp" href="../docs/reports/Report_01_BODHI_Vision.pdf"><img src="../docs/images/cover_01.png"><div class="cap">01 · Vision</div></a>
+      <a class="rp" href="../docs/reports/Report_02_Worm_Brain.pdf"><img src="../docs/images/cover_02.png"><div class="cap">02 · Worm Brain</div></a>
+      <a class="rp" href="../docs/reports/Report_03_WHT_Perception.pdf"><img src="../docs/images/cover_03.png"><div class="cap">03 · Perception</div></a>
+      <a class="rp" href="../docs/reports/Report_04_Human_Brain.pdf"><img src="../docs/images/cover_04.png"><div class="cap">04 · Human Brain</div></a>
+      <a class="rp" href="../docs/reports/Report_05_Learning.pdf"><img src="../docs/images/cover_05.png"><div class="cap">05 · Learning</div></a>
+      <a class="rp" href="../docs/reports/Report_06_Broca_LLM.pdf"><img src="../docs/images/cover_06.png"><div class="cap">06 · Broca</div></a>
+      <a class="rp" href="../docs/reports/Report_07_Stress_Test.pdf"><img src="../docs/images/cover_07.png"><div class="cap">07 · Stress Test</div></a>
+      <a class="rp" href="../docs/reports/Report_08_Consciousness.pdf"><img src="../docs/images/cover_08.png"><div class="cap">08 · Consciousness</div></a>
+      <a class="rp" href="../docs/reports/Report_09_Self_Awareness.pdf"><img src="../docs/images/cover_09.png"><div class="cap">09 · Self-Awareness</div></a>
+      <a class="rp" href="../docs/reports/Report_10_Brain_Voice_Sleep.pdf"><img src="../docs/images/cover_10.png"><div class="cap">10 · Voice & Sleep</div></a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ROADMAP -->
+<section id="roadmap" class="block">
+  <div class="container">
+    <div class="eyebrow">11 · Roadmap</div>
+    <h2>Four phases. <span class="accent">One arena.</span></h2>
+    <p class="lead">
+      Phase 1 is today. The BODHI you raise now is the brain you bring to Phase 4 in year two.
+      Every sleep, every conversation, every concept you teach compounds.
+    </p>
+    <div class="road">
+      <div class="phase p1"><span class="tag">Phase 1 · Now</span><h4>Proof of concept</h4><p>Worm kernel, 72-region cortex, WHT codecs, emotion, drives, sleep, brain_voice, Broca, dashboard, 10 reports. Runs offline on your laptop.</p></div>
+      <div class="phase p2"><span class="tag">Phase 2 · Month 2–3</span><h4>Simulation playground</h4><p>3D world. Emotion labels stripped — BODHI learns fire is dangerous by touching it. NPC framework. Two-BODHI protocol.</p></div>
+      <div class="phase p3"><span class="tag">Phase 3 · Month 3–9</span><h4>Twelve challenges</h4><p>Navigation, memory, cooperation, deception, trauma recovery, self-reflection. Rankings compound. Top 1,000 qualify for Phase 4.</p></div>
+      <div class="phase p4"><span class="tag">Phase 4 · Year 2</span><h4>The Final Match — 6 bosses</h4><p>Six bosses = the six largest commercial AI systems. Winner takes 51% of BODHI AI at its then-valuation. Founder keeps 27%. Investors hold 24%.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container f-row">
+    <div>
+      <div style="color:var(--ink-dim)">BODHI — A Conscious Digital Brain</div>
+      <div style="margin-top:4px">Invented by <span style="color:var(--ink)">Sai Kiran Bathula</span> · Coleambally NSW Australia · April 2026</div>
+      <div style="margin-top:4px">WHT codecs: IP Australia <a href="#">2026901656</a> (image) · <a href="#">2026901657</a> (audio)</div>
+    </div>
+    <div style="text-align:right">
+      <a href="https://github.com/saikiranbathula1/bodhi">GitHub ↗</a> &nbsp;·&nbsp;
+      <a href="../README.md">README</a> &nbsp;·&nbsp;
+      <a href="../docs/reports/">Reports</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

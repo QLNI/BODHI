@@ -1,0 +1,20 @@
+# BODHI core — required
+numpy>=1.24
+pillow>=10.0
+torch>=2.0
+sentencepiece>=0.1.99
+cryptography>=41.0
+requests>=2.31
+
+# Web UI — recommended
+flask>=3.0
+
+# Optional — only needed for specific features
+# Teaching from audio files (mp3/wav decoding):
+#   soundfile>=0.12
+# Or (fallback, works for wav only):
+#   scipy>=1.10
+# Generating PDF reports (docs/reports/*.pdf):
+#   reportlab>=4.0
+# Generating README images and plots:
+#   matplotlib>=3.7
