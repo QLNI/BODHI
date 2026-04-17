@@ -1,0 +1,5 @@
+{
+  "type": "spm",
+  "model_path": "out_v2\\bodhi_spm.model",
+  "vocab_size": 8000
+}

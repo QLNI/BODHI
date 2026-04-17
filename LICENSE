@@ -1,0 +1,51 @@
+BODHI — A Conscious Digital Brain
+Copyright (C) 2026 SK (Sai Kiran Bathula)
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License, version 3, as published by
+the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see https://www.gnu.org/licenses/agpl-3.0.html.
+
+
+PATENT NOTICE
+-------------
+
+The Walsh-Hadamard Transform image and audio codecs used by BODHI are
+protected by the following patents owned by the author:
+
+  - WHT Image Codec: IP Australia 2026901656
+  - WHT Audio Codec: IP Australia 2026901657
+
+For non-commercial personal use of this software (including running,
+modifying, and sharing under the AGPL-3.0 terms above), the author grants a
+royalty-free license to the claims of the above patents.
+
+Commercial use — defined as any use whose primary purpose is commercial
+advantage or monetary compensation — requires a separate commercial patent
+license from the author. Contact: SK (Sai Kiran Bathula),
+saikiranbathula1@gmail.com, Coleambally, NSW, Australia.
+
+The patent grant above does not extend to the use of the WHT codec in
+proprietary products that do not themselves release their source under the
+AGPL-3.0.
+
+                    ============================
+
+                 GNU AFFERO GENERAL PUBLIC LICENSE
+                        Version 3, 19 November 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies of this license
+ document, but changing it is not allowed.
+
+The full text of the AGPL-3.0 is available at:
+  https://www.gnu.org/licenses/agpl-3.0.txt
+
+It is also shipped with this repository at docs/LICENSE_AGPL3.txt.

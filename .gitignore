@@ -1,0 +1,47 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Per-install state (each user's BODHI grows its own memory)
+data/brain_state/
+data/bodhi_memory.db
+data/learned/
+data/dream_stress_test.png
+data/stress_images/
+data/concepts/
+
+# User-generated / scratch
+dreams_and_thoughts/
+test_tmp/
+*.log
+demo_today*.log
+train_log*.txt
+_*.json
+_*.py
+
+# Eval output
+eval_results.json
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# LoRA adapters (per user)
+lora_adapter.pt
+*.pt.bak
+
+# Large fp32 weights — users can re-export from int8 if needed
+bodhi_llm/out_v2/bodhi_small_fp32.pt
+bodhi_llm/out/bodhi_small_fp32.pt
+# Runtime
+data/bodhi_memory.db
+data/brain_state/
+bodhi_llm/out_v2/*.lora.pt
+eval_results.json
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
