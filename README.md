@@ -184,14 +184,27 @@ two BODHIs speak alike.
 
 ## Install (3 minutes)
 
-Requires Python 3.10+.
+Requires Python 3.10+ and [Git LFS](https://git-lfs.com/).
 
 ```bash
-git clone <repo-url> bodhi
+# 1. Install Git LFS (once per machine)
+git lfs install
+
+# 2. Clone — large data files stream automatically via LFS
+git clone https://github.com/QLNI/BODHI bodhi
 cd bodhi
+
+# 3. Install dependencies
 pip install -r requirements.txt
+
+# 4. Run
 python bodhi.py
 ```
+
+> **No Git LFS?** Run `python download_data.py` after cloning to fetch the
+> three large data files (fingerprints_img.npz · 469 MB,
+> fingerprints_aud.npz · 282 MB, bodhi_small_int8_state.pt · 51 MB)
+> directly from the [v1.0 release](https://github.com/QLNI/BODHI/releases/tag/v1.0).
 
 First boot takes ~30 seconds to load the 10,000 fingerprints. After that,
 every turn responds in 10-50 ms.
