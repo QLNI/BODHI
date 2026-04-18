@@ -162,7 +162,7 @@ A six-layer pipeline that processes every input:
    learned emotional memory. Not LLM hallucination. The sentence *reports*
    the numbers.
 
-![Live brain_voice output](docs/images/brain_voice_demo.png)
+![BODHI dreams — memory blending during nightly consolidation](docs/images/bodhi_dreams.png)
 
 Every clause is traceable to a real value in the pipeline. BODHI never says
 *"I feel peaceful about fire"* because the fire signal cannot produce a
@@ -343,7 +343,9 @@ Should print `SUMMARY: 12 passed, 0 failed, 0 skipped`.
 Any concept BODHI knows can be reconstructed back to an image. This is
 what its visual cortex "sees" when you mention the word.
 
-![imagination examples](docs/images/imagination_examples.png)
+![BODHI imagination — concepts learned from WHT fingerprints](docs/images/bodhi_imagination.png)
+
+![BODHI unseen — first encounter with new concepts](docs/images/bodhi_unseen.png)
 
 ```python
 from bodhi import BODHI, fp_to_image

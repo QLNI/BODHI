@@ -2,74 +2,58 @@
 """
 download_data.py — BODHI large-file bootstrapper
 =================================================
-Downloads the large binary assets from the GitHub Release
-(fingerprint .npz files + the int8 LLM weights) into their
-expected locations.  The code repo ships without these files
-to stay under GitHub's 100 MB limit.
+Downloads fingerprint databases and LLM weights from the GitHub Release.
+Run this if you cloned without Git LFS, or if data files are missing/stubs.
 
-Usage
------
-    python download_data.py            # download all assets
-    python download_data.py --verify   # checksum only, no download
-    python download_data.py --list     # list assets + sizes, no download
+    python download_data.py            # download all
+    python download_data.py --verify   # check files only
+    python download_data.py --list     # list what will be downloaded
 
-Requirements: Python 3.9+, stdlib only (uses urllib).
+Works on Windows, macOS, Linux. Python 3.8+ stdlib only.
 """
 
 import argparse
-import hashlib
 import os
 import sys
 import urllib.request
 from pathlib import Path
 
-REPO = "QLNI/BODHI"
+REPO = "QLNI/bodhi"
 TAG  = "v1.0"
+BASE = f"https://github.com/{REPO}/releases/download/{TAG}"
 
-# (destination_path_relative_to_repo, asset_name_on_release)
+# (local path relative to repo root, release filename, expected min size bytes)
 ASSETS = [
-    ("data/fingerprints_img.npz",              "fingerprints_img.npz"),
-    ("data/fingerprints_aud.npz",              "fingerprints_aud.npz"),
-    ("bodhi_llm/out_v2/bodhi_small_int8_state.pt", "bodhi_small_int8_state.pt"),
+    ("data/fingerprints_img.npz",                 "fingerprints_img.npz",          50_000_000),
+    ("data/fingerprints_aud.npz",                 "fingerprints_aud.npz",          20_000_000),
+    ("bodhi_llm/out_v2/bodhi_small_int8_state.pt","bodhi_small_int8_state.pt",     40_000_000),
 ]
 
-BASE_URL = f"https://github.com/{REPO}/releases/download/{TAG}"
 
-SIZES = {
-    "fingerprints_img.npz":          469_000_000,   # ~469 MB
-    "fingerprints_aud.npz":          282_000_000,   # ~282 MB
-    "bodhi_small_int8_state.pt":      51_000_000,   # ~51 MB
-}
-
-# ── helpers ────────────────────────────────────────────────────────────────
-
-def _bar(done: int, total: int, width: int = 40) -> str:
-    frac  = done / total if total else 0
-    filled = int(width * frac)
-    bar   = "█" * filled + "░" * (width - filled)
-    mb_done  = done  / 1_048_576
-    mb_total = total / 1_048_576
-    return f"\r  [{bar}] {mb_done:6.1f}/{mb_total:.1f} MB  {frac*100:5.1f}%"
+def _bar(done, total, w=40):
+    frac   = done / total if total else 0
+    filled = int(w * frac)
+    return f"\r  [{'█'*filled}{'░'*(w-filled)}] {done/1e6:6.1f}/{total/1e6:.0f} MB  {frac*100:5.1f}%"
 
 
-def _download(url: str, dest: Path) -> None:
+def _fetch(url, dest):
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "BODHI-downloader/1.0"})
-        with urllib.request.urlopen(req) as resp:
-            total = int(resp.headers.get("Content-Length", 0))
+        req = urllib.request.Request(url, headers={"User-Agent": "BODHI/1.0"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            total = int(r.headers.get("Content-Length", 0))
             done  = 0
-            with open(tmp, "wb") as fh:
+            with open(tmp, "wb") as f:
                 while True:
-                    chunk = resp.read(65_536)
+                    chunk = r.read(65536)
                     if not chunk:
                         break
-                    fh.write(chunk)
+                    f.write(chunk)
                     done += len(chunk)
                     if total:
                         print(_bar(done, total), end="", flush=True)
-        print()  # newline after bar
+        print()
         tmp.rename(dest)
     except Exception:
         if tmp.exists():
@@ -77,75 +61,64 @@ def _download(url: str, dest: Path) -> None:
         raise
 
 
-def _sha256(path: Path, chunk: int = 1 << 20) -> str:
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        while True:
-            data = f.read(chunk)
-            if not data:
-                break
-            h.update(data)
-    return h.hexdigest()
+def _is_stub(path: Path, min_size: int) -> bool:
+    """True if the file is a Git LFS pointer stub (too small to be real data)."""
+    if not path.exists():
+        return True
+    return path.stat().st_size < min_size
 
-# ── main ───────────────────────────────────────────────────────────────────
 
-def main() -> None:
-    ap = argparse.ArgumentParser(description="Download BODHI large data assets")
-    ap.add_argument("--verify", action="store_true", help="Verify existing files only")
-    ap.add_argument("--list",   action="store_true", help="List assets and expected sizes")
-    ap.add_argument("--force",  action="store_true", help="Re-download even if file exists")
+def main():
+    ap = argparse.ArgumentParser(description="Download BODHI large data files")
+    ap.add_argument("--verify", action="store_true", help="Verify files only")
+    ap.add_argument("--list",   action="store_true", help="List assets")
+    ap.add_argument("--force",  action="store_true", help="Force re-download")
     args = ap.parse_args()
 
-    repo_root = Path(__file__).resolve().parent
+    root = Path(__file__).resolve().parent
 
     if args.list:
-        print(f"\nBODHI release assets  ({BASE_URL}/...)\n")
-        for rel_path, asset in ASSETS:
-            size = SIZES.get(asset, 0)
-            print(f"  {rel_path:<55}  {size/1e6:6.0f} MB")
+        print(f"\nBODHI data assets  (release {TAG})\n")
+        for rel, name, _ in ASSETS:
+            print(f"  {rel}")
         print()
         return
 
-    print(f"\nBODHI Data Bootstrapper  — release {TAG}\n")
+    print(f"\nBODHI Data Bootstrapper  —  release {TAG}\n")
     all_ok = True
 
-    for rel_path, asset in ASSETS:
-        dest = repo_root / rel_path
-        url  = f"{BASE_URL}/{asset}"
-
-        if dest.exists() and not args.force:
-            size = dest.stat().st_size
-            exp  = SIZES.get(asset, 0)
-            if exp and abs(size - exp) / exp > 0.01:
-                print(f"  ⚠  {rel_path}  — size mismatch ({size} vs {exp}), re-downloading")
-            else:
-                print(f"  ✓  {rel_path}  ({size/1e6:.0f} MB) — already present")
-                continue
-
-        if args.verify:
-            print(f"  ✗  {rel_path}  — MISSING")
-            all_ok = False
+    for rel, name, min_size in ASSETS:
+        dest = root / rel
+        if dest.exists() and not _is_stub(dest, min_size) and not args.force:
+            print(f"  ✓  {rel}  ({dest.stat().st_size/1e6:.0f} MB)")
             continue
 
-        print(f"  ↓  {asset}  →  {rel_path}")
+        if args.verify:
+            status = "STUB/MISSING" if _is_stub(dest, min_size) else "OK"
+            if status != "OK":
+                print(f"  ✗  {rel}  — {status}")
+                all_ok = False
+            else:
+                print(f"  ✓  {rel}")
+            continue
+
+        print(f"  ↓  {name}")
         try:
-            _download(url, dest)
-            size = dest.stat().st_size
-            print(f"     saved {size/1e6:.1f} MB")
-        except Exception as exc:
-            print(f"\n  ERROR downloading {asset}: {exc}", file=sys.stderr)
+            _fetch(f"{BASE}/{name}", dest)
+            print(f"     saved {dest.stat().st_size/1e6:.1f} MB")
+        except Exception as e:
+            print(f"\n  ERROR: {name}: {e}", file=sys.stderr)
             all_ok = False
 
     if args.verify:
-        if all_ok:
-            print("\n  All assets present.\n")
-        else:
-            print("\n  Some assets missing — run: python download_data.py\n")
+        msg = "All data files present." if all_ok else "Some files missing — run: python download_data.py"
+        print(f"\n  {msg}\n")
+        if not all_ok:
             sys.exit(1)
     elif all_ok:
-        print("\n  Done.  BODHI is ready.\n")
+        print("\n  BODHI data ready.\n")
     else:
-        print("\n  Some downloads failed.  Check your connection and retry.\n")
+        print("\n  Some downloads failed. Check connection and retry.\n")
         sys.exit(1)
 
 

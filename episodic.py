@@ -142,3 +142,19 @@ class EpisodicMemory:
             return row[0] if row else 0
         except Exception:
             return 0
+
+    def quick_recall(self, query_text: str, top_k: int = 3) -> list:
+        """Convenience wrapper: recall by text string without needing hebbian.
+
+        Splits query into concept tokens and searches without Hebbian expansion.
+        Useful for standalone use and examples.
+        """
+        import re
+        tokens = re.findall(r"[a-zA-Z]+", query_text.lower())
+        concepts = [t for t in tokens if len(t) >= 4]
+
+        class _NoHebbian:
+            def get_associates(self, c):
+                return []
+
+        return self.recall(concepts or [query_text], _NoHebbian(), top_k=top_k)

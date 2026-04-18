@@ -1076,6 +1076,53 @@ class IntTrainer:
 # SECTION 9 — BODHI LLM (MAIN BRIDGE)
 # ─────────────────────────────────────────────────────────────────────────────
 
+class _LiveBrainInterface:
+    """
+    Wraps a running BODHI instance (BODHI object) so BodhiLLM can pull
+    integer context from it directly without needing a file path.
+    """
+
+    def __init__(self, brain_obj):
+        self.brain = brain_obj
+
+    def get_context_vector(self, query_text: str) -> list:
+        vec = _zero_vec(D_MODEL)
+        try:
+            result = self.brain.think(query_text)
+            d = result[1] if isinstance(result, tuple) else result
+            if isinstance(d, dict):
+                # Pack available integer brain signals into context vector
+                vec[0] = int(d.get("confidence", 0)) & 0x7FFF
+                vec[1] = int(d.get("intensity",  0)) & 0x7FFF
+                # emotion as hash
+                emo = str(d.get("emotion", ""))
+                eh = int(hashlib.md5(emo.encode()).hexdigest(), 16) % INIT_RANGE
+                vec[2] = eh
+                # reflex
+                ref = str(d.get("reflex", ""))
+                vec[3] = int(hashlib.md5(ref.encode()).hexdigest(), 16) % INIT_RANGE
+                # active regions count
+                active = d.get("active_regions", {})
+                vec[4] = len(active) & 0x7FFF
+        except Exception:
+            pass
+        return int_clip_vec(vec)
+
+    def collect_response(self, generated_ids: list, tok) -> dict:
+        text = tok.decode(generated_ids)
+        return {
+            "token_count":   len(generated_ids),
+            "unique_tokens": len(set(generated_ids)),
+            "hash_signal":   int(hashlib.sha256(text.encode()).hexdigest()[:8], 16) & 0x7FFFFFFF,
+            "avg_id":        sum(generated_ids) // max(1, len(generated_ids)),
+            "max_id":        max(generated_ids) if generated_ids else 0,
+            "text_len":      len(text),
+        }
+
+    def send_to_brain(self, response_stats: dict):
+        pass  # live brain learns via its own think() calls
+
+
 class BodhiLLM:
     """
     The complete integer-only language bridge.
@@ -1146,13 +1193,23 @@ class BodhiLLM:
         print(_col("green", f"  Prompt attached ({len(prompt)} chars, "
                              f"vocab now {self.tok.size} tokens)"))
 
-    def attach_brain(self, brain_py_path: str):
+    def attach_brain(self, brain_or_path):
         """
-        DIRECT plugin: import bodhi_brain.py and wire integer outputs
-        into the LLM context vector for every generation step.
+        DIRECT plugin: attach a running BODHI brain instance OR a path to
+        bodhi_brain.py.
+
+        Usage:
+            llm.attach_brain(brain)            # pass running BODHI instance
+            llm.attach_brain("bodhi_brain.py") # pass file path string
         """
-        self.brain = BodhiBrainInterface(mode="direct", brain_path=brain_py_path)
-        print(_col("green", f"  Brain attached (direct): {brain_py_path}"))
+        if isinstance(brain_or_path, str):
+            # Legacy: file path
+            self.brain = BodhiBrainInterface(mode="direct", brain_path=brain_or_path)
+            print(_col("green", f"  Brain attached (direct): {brain_or_path}"))
+        else:
+            # Running BODHI object — wrap it so the LLM can pull context
+            self.brain = _LiveBrainInterface(brain_or_path)
+            print(_col("green", "  Brain attached (live instance)"))
 
     def attach_brain_file(self, state_json_path: str):
         """

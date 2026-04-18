@@ -51,7 +51,7 @@ class GoalTracker:
         )""")
         self.db.commit()
 
-    def add(self, text, turn, priority=1):
+    def add(self, text, turn=0, priority=1):
         text = (text or "").strip()
         if not text:
             return None

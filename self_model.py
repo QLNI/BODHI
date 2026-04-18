@@ -167,6 +167,12 @@ class SelfModel:
                 out[k] = v
         return out
 
+    def describe(self) -> str:
+        """Return current self-description. If none exists yet, build one now."""
+        if not self.current_text:
+            return self.reflect(turn=0)
+        return self.current_text
+
     def short_identity_line(self):
         """One-line identity snippet to inject into system prompts."""
         if not self.current_text:

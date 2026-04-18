@@ -108,7 +108,7 @@ _SEQ = _sequency_order()
 # IMAGE PERCEPTION
 # ============================================================================
 
-def encode_image_to_fingerprint(image_np: np.ndarray, keep_coeffs: int = 32) -> np.ndarray:
+def encode_image_to_fingerprint(image_np: np.ndarray, keep_coeffs: int = 64) -> np.ndarray:
     """
     Encode RGB image → WHT fingerprint vector (integer).
 
@@ -119,8 +119,8 @@ def encode_image_to_fingerprint(image_np: np.ndarray, keep_coeffs: int = 32) -> 
     Output: flat int32 array of WHT coefficients
             shape: (3 * keep_coeffs * num_blocks,)
 
-    With keep_coeffs=32: captures ~50% of visual information
-    With keep_coeffs=64: lossless (56.4 dB PSNR proven at 4K)
+    With keep_coeffs=64: lossless (56.4 dB PSNR proven at 4K) — DEFAULT
+    With keep_coeffs=32: captures ~50% of visual information, 2x smaller
     """
     H, W, C = image_np.shape
     pad_h = (BLOCK - H % BLOCK) % BLOCK
@@ -147,7 +147,7 @@ def encode_image_to_fingerprint(image_np: np.ndarray, keep_coeffs: int = 32) -> 
 
 
 def decode_fingerprint_to_image(fingerprint: np.ndarray, H: int, W: int,
-                                 keep_coeffs: int = 32) -> np.ndarray:
+                                 keep_coeffs: int = 64) -> np.ndarray:
     """
     Decode WHT fingerprint → RGB image (dream reconstruction).
 
@@ -458,7 +458,7 @@ class WHTPerceptionSensor:
     def perceive_image(self, image_np: np.ndarray,
                         image_id: str = "",
                         label: str = "",
-                        keep_coeffs: int = 32) -> WHTPerceptEvent:
+                        keep_coeffs: int = 64) -> WHTPerceptEvent:
         """
         BODHI sees an image.
 
@@ -584,6 +584,25 @@ class WHTPerceptionSensor:
             )
         else:
             raise ValueError(f"Unknown modality: {event.modality}")
+
+    # ── Convenience aliases so external code can call .see() and .hear() ──
+
+    def see(self, image_np: np.ndarray, label: str = "",
+             keep_coeffs: int = 64) -> "WHTPerceptEvent":
+        """Alias for perceive_image. BODHI sees an image."""
+        return self.perceive_image(image_np, label=label, keep_coeffs=keep_coeffs)
+
+    def hear(self, samples: np.ndarray, sample_rate: int = 44100,
+              label: str = "", keep_coeffs: int = 64) -> "WHTPerceptEvent":
+        """Alias for perceive_audio. BODHI hears audio."""
+        return self.perceive_audio(samples, sample_rate=sample_rate,
+                                   label=label, keep_coeffs=keep_coeffs)
+
+    def watch(self, frames: list, fps: float = 30.0,
+               label: str = "", keep_coeffs: int = 16) -> "WHTPerceptEvent":
+        """Alias for perceive_video. BODHI watches video."""
+        return self.perceive_video(frames, fps=fps, label=label,
+                                   keep_coeffs=keep_coeffs)
 
     def reconstruct_from_engram(self, engram: dict):
         """

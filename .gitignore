@@ -45,3 +45,6 @@ __pycache__/
 *.pyc
 *.pyo
 .DS_Store
+
+# AES key logic — proprietary, distribute .enc only
+brain/codec_guard.py
