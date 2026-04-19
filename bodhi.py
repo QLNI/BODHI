@@ -350,9 +350,16 @@ class BODHI:
             if handled:
                 elapsed = int((time.time() - t0) * 1000)
                 self.state = {
-                    "emotion": "neutral", "reflex": "none", "concepts": [],
-                    "associates": [], "turn": self.turn, "ms": elapsed,
+                    "emotion": "neutral", "intensity": 0,
+                    "reflex": "none", "worm_confidence": 0,
+                    "concepts": [], "associates": [],
+                    "top_regions": [],
+                    "drives": dict(self.drives.drives),
+                    "hebbian_count": self.hebbian.total_connections(),
+                    "emotional_count": len(self.emotional.memory),
+                    "turn": self.turn, "ms": elapsed,
                     "source": "teach_command",
+                    "sleep": None,
                 }
                 return reply_text, self.state
 

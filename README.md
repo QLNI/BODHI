@@ -202,8 +202,8 @@ python bodhi.py
 ```
 
 > **No Git LFS?** Run `python download_data.py` after cloning to fetch the
-> three large data files (fingerprints_img.npz · 469 MB,
-> fingerprints_aud.npz · 282 MB, bodhi_small_int8_state.pt · 51 MB)
+> three large data files (fingerprints_img.npz · 116 MB,
+> fingerprints_aud.npz · 54 MB, bodhi_small_int8_state.pt · 51 MB)
 > directly from the [v1.0 release](https://github.com/QLNI/BODHI/releases/tag/v1.0).
 
 First boot takes ~30 seconds to load the 10,000 fingerprints. After that,
